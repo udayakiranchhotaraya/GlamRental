@@ -29,7 +29,7 @@ async function getUsers (req, res) {
         if (users.length > 0) {
             res.status(200).json(users);
         } else {
-            res.status(404).json({"message" : "No records found"});
+            res.status(404).json({"message" : "No record(s) found"});
         }
     } catch (error) {
         res.status(500).json({"message" : error.message});
