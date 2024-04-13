@@ -36,7 +36,61 @@ async function getUsers (req, res) {
     }
 }
 
+async function loginUser (req, res) {
+    try {
+        const { email, mobile, password } = req.body;
+        const user = await User.findOne({ $or: [ { email: { $eq: email } }, { mobile: { $eq: mobile } } ] });
+        if (!(user) || !(await user.comparePassword(password))) {
+            res.status(401).json({"message" : "Invalid username or password"});
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({"message" : error.message});
+    }
+}
+
+async function updateUserDetails (req, res) {
+    try {
+        const { id } = req.params;
+        const { email, mobile, name } = req.body;
+        const user = await User.findOneAndUpdate({_id : id}, {
+            email: email,
+            mobile: mobile,
+            name: name,
+        }, {
+            new: true
+        });
+        user.save();
+        if (user) {
+            res.status(200).json(user);
+        } else {
+            res.status(400).json({"message" : "Some error occurred!"});
+        }
+    } catch (error) {
+        res.status(400).json({"message" : error.message});
+    }
+}
+
+async function makeUserASeller (req, res) {
+    try {
+        const { id } = req.params;
+        const user = await User.findOneAndUpdate({_id : id}, {
+            $push : {
+                roles: 'owner'
+            }
+        }, {
+            new: true
+        });
+        res.status(200).json({"message": "User registered as Seller successfully", user});
+    } catch (error) {
+        res.status(500).json({"message" : error.message});
+    }
+}
+
 module.exports = {
     addUser,
-    getUsers
+    getUsers,
+    loginUser,
+    updateUserDetails,
+    makeUserASeller
 };

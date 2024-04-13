@@ -6,6 +6,7 @@ const dbConnect = require('./db/db.config');
 
 const UserRouter = require('./routes/user.router');
 const DressRouter = require('./routes/dress.router');
+const CartRouter = require('./routes/cart.router');
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.urlencoded({extended: true}));
 
 app.use('/users', UserRouter);
 app.use('/dress', DressRouter);
+app.use('/cart', CartRouter);
 
 dbConnect()
 
