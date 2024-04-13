@@ -87,10 +87,28 @@ async function makeUserASeller (req, res) {
     }
 }
 
+async function addAddress (req, res) {
+    try {
+        const { id } = req.params;
+        const { address } = req.body;
+        const user = await User.findOneAndUpdate({_id: id}, {
+            $push : {
+                address: address
+            }
+        }, {
+            new: true
+        });
+        res.status(200).json({user});
+    } catch (error) {
+        res.status(500).json({"message" : error.message});
+    }
+}
+
 module.exports = {
     addUser,
     getUsers,
     loginUser,
     updateUserDetails,
+    addAddress,
     makeUserASeller
 };
