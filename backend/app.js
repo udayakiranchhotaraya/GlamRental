@@ -4,6 +4,9 @@ require('dotenv').config();
 
 const dbConnect = require('./db/db.config');
 
+const { jwtMiddleware } = require('./middleware/jwt-auth');
+
+const AdminRouter = require('./routes/admin.router');
 const UserRouter = require('./routes/user.router');
 const DressRouter = require('./routes/dress.router');
 const CartRouter = require('./routes/cart.router');
@@ -15,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
+app.use('/admin', AdminRouter);
 app.use('/users', UserRouter);
 app.use('/dress', DressRouter);
 app.use('/cart', CartRouter);

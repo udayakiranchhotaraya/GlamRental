@@ -2,20 +2,20 @@ const express = require('express');
 
 const {
     addUser,
-    getUsers,
     loginUser,
     updateUserDetails,
     addAddress,
     makeUserASeller
 } = require('../controllers/user.controller');
 
+const { jwtMiddleware } = require('../middleware/jwt-auth');
+
 const UserRouter = express.Router();
 
-UserRouter.get('/', getUsers);
 UserRouter.get('/signin', loginUser);
 UserRouter.post('/signup', addUser);
-UserRouter.put('/updateDetails/:id', updateUserDetails);
-UserRouter.put('/newAddress/:id', addAddress);
-UserRouter.put('/registerAsSeller/:id', makeUserASeller);
+UserRouter.put('/updateDetails/:id', jwtMiddleware, updateUserDetails);
+UserRouter.put('/newAddress/:id', jwtMiddleware, addAddress);
+UserRouter.put('/registerAsSeller/:id', jwtMiddleware, makeUserASeller);
 
 module.exports = UserRouter;
