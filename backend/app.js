@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const dbConnect = require('./db/db.config');
 
-const { jwtMiddleware } = require('./middleware/jwt-auth');
+const { jwtMiddleware } = require('./middleware/jwt-auth.middleware');
 
 const AdminRouter = require('./routes/admin.router');
 const UserRouter = require('./routes/user.router');

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const {
     User, Dress, Admin
 } = require('../models');
-const { generateToken } = require('../middleware/jwt-auth');
+const { generateToken } = require('../middleware/jwt-auth.middleware');
 
 const message_403 = "Only admins can access this route";
 

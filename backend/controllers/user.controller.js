@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const User = require('../models/users.model');
-const { generateToken } = require('../middleware/jwt-auth');
+const { generateToken } = require('../middleware/jwt-auth.middleware');
 
 async function registerUser (req, res) {
     try {
