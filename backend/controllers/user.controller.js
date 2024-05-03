@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/users.model');
 const { generateToken } = require('../middleware/jwt-auth');
 
-async function addUser (req, res) {
+async function registerUser (req, res) {
     try {
         const { email, mobile, password, name, address } = req.body;
         const user = await User.create({
@@ -16,7 +16,7 @@ async function addUser (req, res) {
         });
 
         const payload = {
-            id: user.id,
+            userId: user.id,
             name: user.name,
             isAdmin: false
         };
@@ -37,11 +37,11 @@ async function loginUser (req, res) {
         const { email, mobile, password } = req.body;
         const user = await User.findOne({ $or: [ { email: { $eq: email } }, { mobile: { $eq: mobile } } ] });
         if (!(user) || !(await user.comparePassword(password))) {
-            res.status(401).json({"message" : "Invalid username or password"});
+            res.status(401).json({"message" : "Invalid credientials"});
         }
 
         const payload = {
-            id: user.id,
+            userId: user.id,
             name: user.name,
             isAdmin: false
         };
@@ -55,9 +55,9 @@ async function loginUser (req, res) {
 
 async function updateUserDetails (req, res) {
     try {
-        const { id } = req.user;
+        const { userId } = req.user;
         const { email, mobile, name } = req.body;
-        const user = await User.findOneAndUpdate({_id : id}, {
+        const user = await User.findOneAndUpdate({_id : userId}, {
             email: email,
             mobile: mobile,
             name: name,
@@ -77,8 +77,8 @@ async function updateUserDetails (req, res) {
 
 async function makeUserASeller (req, res) {
     try {
-        const { id } = req.user;
-        const user = await User.findOneAndUpdate({_id : id}, {
+        const { userId } = req.user;
+        const user = await User.findOneAndUpdate({_id : userId}, {
             $push : {
                 roles: 'owner'
             }
@@ -93,9 +93,9 @@ async function makeUserASeller (req, res) {
 
 async function addAddress (req, res) {
     try {
-        const { id } = req.user;
+        const { userId } = req.user;
         const { address } = req.body;
-        const user = await User.findOneAndUpdate({_id: id}, {
+        const user = await User.findOneAndUpdate({_id: userId}, {
             $push : {
                 address: address
             }
@@ -108,10 +108,48 @@ async function addAddress (req, res) {
     }
 }
 
+async function updateAddress (req, res) {
+    try {
+        const { userId } = req.user;
+        const { addressId } = req.params;
+        const { updatedAddress } = req.body;
+
+        const user = await User.findOne({_id: userId});
+        if (!user) {
+            return res.status(404).json({"message" : "User not found"});
+        }
+
+        const addressIndex = user.address.findIndex((address) => address._id.toString() === addressId);
+        if (addressIndex === -1) {
+            return res.status(404).json({"message" : "Address not found"});
+        }
+
+        user.address[addressIndex] = updatedAddress;
+
+        await user.save();
+
+        res.status(200).json({"message" : "Address updated successfully", user});
+    } catch (error) {
+        res.status(500).json({"message" : error.message});
+    }
+}
+
+async function deleteUser (req, res) {
+    try {
+        const { userId } = req.user;
+        const user = await User.findOneAndDelete({_id: userId});
+        res.status(200).json({user});
+    } catch (error) {
+        res.status(500).json({"message" : error.message});
+    }
+}
+
 module.exports = {
-    addUser,
+    registerUser,
     loginUser,
     updateUserDetails,
     addAddress,
-    makeUserASeller
+    updateAddress,
+    makeUserASeller,
+    deleteUser
 };
