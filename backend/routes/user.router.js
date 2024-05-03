@@ -10,7 +10,7 @@ const {
     deleteUser,
 } = require('../controllers/user.controller');
 
-const { jwtMiddleware } = require('../middleware/jwt-auth');
+const { jwtMiddleware } = require('../middleware/jwt-auth.middleware');
 
 const UserRouter = express.Router();
 
