@@ -36,13 +36,17 @@ const dressSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    quantity : {
+    total_quantity : {
+        type: Number,
+        default: 0
+    },
+    available_quantity : {
         type: Number,
         default: 0
     },
     availability : {
         type: Boolean,
-        default: true
+        default: false
     },
     owner_id : {
         type: mongoose.Schema.Types.ObjectId,

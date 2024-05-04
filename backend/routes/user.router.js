@@ -1,19 +1,25 @@
 const express = require('express');
 
 const {
-    addUser,
-    getUsers,
+    registerUser,
     loginUser,
     updateUserDetails,
-    makeUserASeller
+    addAddress,
+    updateAddress,
+    makeUserASeller,
+    deleteUser,
 } = require('../controllers/user.controller');
+
+const { jwtMiddleware } = require('../middleware/jwt-auth.middleware');
 
 const UserRouter = express.Router();
 
-UserRouter.get('/', getUsers);
 UserRouter.get('/signin', loginUser);
-UserRouter.post('/signup', addUser);
-UserRouter.put('/updateDetails/:id', updateUserDetails);
-UserRouter.put('/registerAsSeller/:id', makeUserASeller);
+UserRouter.post('/signup', registerUser);
+UserRouter.put('/updateDetails/', jwtMiddleware, updateUserDetails);
+UserRouter.put('/newAddress/', jwtMiddleware, addAddress);
+UserRouter.put('/updateAddress/:addressId', jwtMiddleware, updateAddress);
+UserRouter.put('/registerAsSeller/:id', jwtMiddleware, makeUserASeller);
+UserRouter.delete('/', jwtMiddleware, deleteUser);
 
 module.exports = UserRouter;
