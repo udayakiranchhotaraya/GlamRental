@@ -27,7 +27,7 @@ async function addToCart (req, res) {
             existingItem.quantity++;
             // existingItem.price += parseFloat(dress.price);
         } else {
-            cart.items.push({dress_id : dressId, price: dress.price});
+            cart.items.push({dress_id : dressId, dress_title:dress.title, thumbnail: dress.imageUrls[0], price: dress.price});
         }
 
         const totalPrice = cart.items.reduce((total, item) => total + (item.quantity * item.price), 0);
@@ -40,10 +40,10 @@ async function addToCart (req, res) {
         }
         await dress.save();
 
-        res.status(200).json({ "message": 'Item added to cart successfully', cart });
+        return res.status(200).json({ "message": 'Item added to cart successfully', cart });
     } catch (error) {
         console.error('Error adding item to cart:', error);
-        res.status(500).json({ "message": 'Failed to add item to cart' });
+        return res.status(500).json({ "message": 'Failed to add item to cart' });
     }
 }
 
@@ -55,18 +55,17 @@ async function updateCartItems (req, res) {
 
         let cart = await ShoppingCartModel.findOne({_id: cartId});
         if (!(cart)) {
-            res.status(404).json({"message" : "Cart not found"});
+            return res.status(404).json({"message" : "Cart not found"});
         }
 
         const itemIndex = cart.items.findIndex((item) => item.dress_id.toString() === dressId);
         if (itemIndex === -1) {
-            res.status(404).json({"message" : "Item not found in the cart"});
+            return res.status(404).json({"message" : "Item not found in the cart"});
         }
         
         const dress = await Dress.findOne({_id: dressId});
         if (quantity > dress.available_quantity) {
-            res.status(404).json({"message" : "Quantity exceeds availability"});
-            return;
+            return res.status(404).json({"message" : "Quantity exceeds availability"});
         }
 
         const priorItemQuantity = cart.items[itemIndex].quantity;
@@ -89,14 +88,31 @@ async function updateCartItems (req, res) {
         await cart.save();
         await dress.save();
 
-        res.status(200).json({"message" : "Cart item quantity updated successfully", cart});
+        return res.status(200).json({"message" : "Cart item quantity updated successfully", cart});
     } catch (error) {
         console.error('Error updating cart item quantity:', error);
-        res.status(500).json({ "message": 'Failed to update cart item quantity' });
+        return res.status(500).json({ "message": 'Failed to update cart item quantity' });
+    }
+}
+
+async function viewCart (req, res) {
+    try {
+        const { userId } = req.user;
+
+        const cart = await ShoppingCartModel.findOne({user_id: userId, status: 'active'});
+        if (!cart) {
+            return res.status(404).json({"message" : "Cart not found"});
+        } else {
+            return res.status(200).json({ cart });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ "message" : "Some error occurred" });
     }
 }
 
 module.exports = {
     addToCart,
-    updateCartItems
+    updateCartItems,
+    viewCart
 }

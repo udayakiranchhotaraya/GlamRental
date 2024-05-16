@@ -23,21 +23,21 @@ async function registerUser (req, res) {
         const token = generateToken(payload);
 
         if (user && token) {
-            res.status(201).json({"token" : token, "user" : user});
+            return res.status(201).json({"token" : token, "user" : user});
         } else {
-            res.status(400).json({"message" : "Some error occurred!"});
+            return res.status(400).json({"message" : "Some error occurred!"});
         }
     } catch (error) {
-        res.status(400).json({"message" : error.message});
+        return res.status(400).json({"message" : error.message});
     }
 }
 
 async function loginUser (req, res) {
     try {
-        const { email, mobile, password } = req.body;
-        const user = await User.findOne({ $or: [ { email: { $eq: email } }, { mobile: { $eq: mobile } } ] });
+        const { identification, password } = req.body;
+        const user = await User.findOne({ $or: [ { email: { $eq: identification } }, { mobile: { $eq: identification } } ] });
         if (!(user) || !(await user.comparePassword(password))) {
-            res.status(401).json({"message" : "Invalid credientials"});
+            return res.status(401).json({"message" : "Invalid credientials"});
         }
 
         const payload = {
@@ -47,9 +47,23 @@ async function loginUser (req, res) {
         };
         const token = generateToken(payload);
 
-        res.status(200).json({"token" : token, "user" : user});
+        return res.status(200).json({"token" : token, "user" : user});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
+    }
+}
+
+async function getUserDetails (req, res) {
+    try {
+        const { userId } = req.user;
+        const user = await User.findOne({_id: userId});
+        if (user) {
+            return res.status(200).json(user);
+        } else {
+            return res.status(404).json({"message" : "User not found!"});
+        }
+    } catch (error) {
+        return res.status(500).json({ "message" : "Some error occurred!" });
     }
 }
 
@@ -66,12 +80,12 @@ async function updateUserDetails (req, res) {
         });
         user.save();
         if (user) {
-            res.status(200).json(user);
+            return res.status(200).json(user);
         } else {
-            res.status(400).json({"message" : "Some error occurred!"});
+            return res.status(400).json({"message" : "Some error occurred!"});
         }
     } catch (error) {
-        res.status(400).json({"message" : error.message});
+        return res.status(400).json({"message" : error.message});
     }
 }
 
@@ -85,9 +99,9 @@ async function makeUserASeller (req, res) {
         }, {
             new: true
         });
-        res.status(200).json({"message": "User registered as Seller successfully", user});
+        return res.status(200).json({"message": "User registered as Seller successfully", user});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
     }
 }
 
@@ -102,9 +116,9 @@ async function addAddress (req, res) {
         }, {
             new: true
         });
-        res.status(200).json({user});
+        return res.status(200).json({user});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
     }
 }
 
@@ -128,9 +142,9 @@ async function updateAddress (req, res) {
 
         await user.save();
 
-        res.status(200).json({"message" : "Address updated successfully", user});
+        return res.status(200).json({"message" : "Address updated successfully", user});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
     }
 }
 
@@ -138,15 +152,16 @@ async function deleteUser (req, res) {
     try {
         const { userId } = req.user;
         const user = await User.findOneAndDelete({_id: userId});
-        res.status(200).json({user});
+        return res.status(200).json({user});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
     }
 }
 
 module.exports = {
     registerUser,
     loginUser,
+    getUserDetails,
     updateUserDetails,
     addAddress,
     updateAddress,

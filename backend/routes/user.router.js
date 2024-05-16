@@ -8,14 +8,16 @@ const {
     updateAddress,
     makeUserASeller,
     deleteUser,
+    getUserDetails,
 } = require('../controllers/user.controller');
 
 const { jwtMiddleware } = require('../middleware/jwt-auth.middleware');
 
 const UserRouter = express.Router();
 
-UserRouter.get('/signin', loginUser);
+UserRouter.post('/signin', loginUser);
 UserRouter.post('/signup', registerUser);
+UserRouter.get('/', jwtMiddleware, getUserDetails);
 UserRouter.put('/updateDetails/', jwtMiddleware, updateUserDetails);
 UserRouter.put('/newAddress/', jwtMiddleware, addAddress);
 UserRouter.put('/updateAddress/:addressId', jwtMiddleware, updateAddress);

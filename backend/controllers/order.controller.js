@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const axios = require('axios');
 
 const { Order, ShoppingCartModel, User, Dress } = require('../models');
 
@@ -20,6 +21,7 @@ async function placeOrder (req, res) {
             user_id: cart.user_id,
             items: cart.items,
             total_price: cart.total_price,
+            status: 'confirmed',
             address: address[0].address[0]
         });
 
@@ -28,9 +30,9 @@ async function placeOrder (req, res) {
         }
         
         cart = await ShoppingCartModel.findOneAndDelete({_id: cartId});
-        res.status(201).json({"message": "Order placed successfully", order});
+        return res.status(201).json({"message": "Order placed successfully", order});
     } catch (error) {
-        res.status(500).json({"message" : "Failed to place order.", "error" : error.message});
+        return res.status(500).json({"message" : "Failed to place order.", "error" : error.message});
     }
 }
 
@@ -44,9 +46,9 @@ async function confirmOrder(req, res) {
         }, {
             new: true
         });
-        res.status(200).json({"message" : "Order confirmed", order});
+        return res.status(200).json({"message" : "Order confirmed", order});
     } catch (error) {
-        res.status(500).json({"message" : "Failed to confirm order", "error" : error.message});
+        return res.status(500).json({"message" : "Failed to confirm order", "error" : error.message});
     }
 }
 
@@ -56,9 +58,9 @@ async function viewOrders(req, res) {
 
         const orders = await Order.find({user_id: userId});
 
-        res.status(200).json({orders});
+        return res.status(200).json({orders});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
     }
 }
 
@@ -92,9 +94,9 @@ async function cancelOrder(req, res) {
 
         order.status = 'cancelled';
         await order.save();
-        res.status(200).json({"message" : "Order cancelled successfully", order});
+        return res.status(200).json({"message" : "Order cancelled successfully", order});
     } catch (error) {
-        res.status(500).json({"message" : error.message});
+        return res.status(500).json({"message" : error.message});
     }
 }
 

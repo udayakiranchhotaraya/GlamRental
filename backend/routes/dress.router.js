@@ -1,11 +1,10 @@
-const express = require('express');
+const express = require("express");
 
-const {
-    getDresses
-} = require('../controllers/dress.controller');
+const { getDresses, searchDress } = require("../controllers/dress.controller");
 
 const DressRouter = express.Router();
 
-DressRouter.get('/', getDresses);
+DressRouter.get("/", getDresses);
+DressRouter.post("/search", searchDress);
 
 module.exports = DressRouter;
