@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const {
-    User, Dress, Admin
+    User, Dress, Admin, Order
 } = require('../models');
 const { generateToken } = require('../middleware/jwt-auth.middleware');
 
@@ -46,7 +46,7 @@ async function loginAdmin (req, res) {
         const { username, password } = req.body;
         const admin = await Admin.findOne({username: username});
         if (!(admin) || !(await admin.comparePassword(password))) {
-            res.status(401).json({"message" : "Invalid credentials"});
+            return res.status(401).json({"message" : "Invalid credentials"});
         }
 
         const payload = {
@@ -56,9 +56,10 @@ async function loginAdmin (req, res) {
         }
         const token = generateToken(payload);
 
-        res.status(200).json({"token" : token, "user": admin});
+        return res.status(200).json({"token" : token, "user": admin});
     } catch (error) {
-        res.status(400).json({"message" : error.message});
+        throw error;
+        return res.status(400).json({"message" : error.message});
     }
 }
 
@@ -71,10 +72,10 @@ async function loginAdmin (req, res) {
 //     }
 // }
 
-async function getAllUsers (req, res) {
+async function getUsers (req, res) {
     if (req.user.isAdmin) {
         try {
-            const users = await User.find();
+            const users = await User.find(req.query);
             if (users.length > 0) {
                 res.status(200).json(users);
             } else {
@@ -91,19 +92,20 @@ async function getAllUsers (req, res) {
 async function addDress (req, res) {
     if (req.user.isAdmin) {
         try {
-            const { title, category, gender, sizes, colors, material, price, imageUrls, description, quantity, owner_id } = req.body;
+            const { title, category, designer, gender, sizes, colors, material, price, imageUrls, description, quantity, owner_id } = req.body;
             if (quantity > 0) {
                 availability = true;
             } else availability = false;
             const dress = await Dress.create({
                 title: title,
                 category: category,
+                designer: designer,
                 gender: gender,
                 sizes: sizes,
                 colors: colors,
                 material: material,
                 price: price,
-                imageUrl: imageUrls,
+                imageUrls: imageUrls,
                 description: description,
                 total_quantity: quantity,
                 available_quantity: quantity,
@@ -127,16 +129,17 @@ async function updateDressDetails (req, res) {
     if (req.user.isAdmin) {
         try {
             const { id } = req.params;
-            const { title, category, gender, sizes, colors, material, price, imageUrls, description, total_quantity, available_quantity, owner_id } = req.body;
+            const { title, category, designer, gender, sizes, colors, material, price, imageUrls, description, total_quantity, available_quantity, owner_id } = req.body;
             const dress = await Dress.findOneAndUpdate({_id: id}, {
                 title: title,
                 category: category,
+                designer: designer,
                 gender: gender,
                 sizes: sizes,
                 colors: colors,
                 material: material,
                 price: price,
-                imageUrl: imageUrls,
+                imageUrls: imageUrls,
                 description: description,
                 total_quantity: total_quantity,
                 available_quantity: available_quantity,
@@ -157,11 +160,29 @@ async function updateDressDetails (req, res) {
     }
 }
 
+async function getOrders (req, res) {
+    if (req.user.isAdmin) {
+        try {
+            const orders = await Order.find(req.query);
+            if (orders.length > 0) {
+                res.status(200).json(orders);
+            } else {
+                res.status(404).json({"message" : "No record(s) found"});
+            }
+        } catch (error) {
+            res.status(400).json({"message" : error.message});
+        }
+    } else {
+        res.status(403).json({"message" : message_403});
+    }
+}
+
 module.exports = {
     // admins,
     registerNewAdmin,
     loginAdmin,
-    getAllUsers,
+    getUsers,
     addDress,
-    updateDressDetails
+    updateDressDetails,
+    getOrders
 };

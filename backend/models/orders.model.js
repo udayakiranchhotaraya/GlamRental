@@ -15,6 +15,13 @@ const orderSchema = new mongoose.Schema({
             ref: 'Dress',
             required: true
         },
+        dress_title: {
+            type: String,
+            required: true
+        },
+        thumbnail : {
+            type: String
+        },
         quantity : {
             type: Number,
             default: 1,
